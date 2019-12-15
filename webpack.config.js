@@ -84,6 +84,10 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
+        test: /\.(gif|svg|jpg|png|woff|woff2|ttf|eot)$/,
+        loader: 'file-loader',
+      },
+      {
         test: /\.(css|scss|sass)$/,
         include: [ path.resolve(__dirname, 'src/') ],
         exclude: [ path.resolve(__dirname, 'node_modules/') ],

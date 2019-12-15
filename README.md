@@ -28,6 +28,7 @@ In the root folder, create a file called ".env.development" with the next conten
 NODE_PATH=./src
 ENVIRONMENT=development
 PUBLIC_URL=http://localhost:3000/
+GOOGLE_API_KEY={YOUR_API_KEY}
 ```
 
 Now start the development server using

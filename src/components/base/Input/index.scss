@@ -1,0 +1,23 @@
+@import 'styles/constants.scss';
+
+.custom-input {
+  display: flex;
+
+  input {
+    font-family: 'Roboto', sans-serif;
+    font-size: $font-size;
+    height: $margin-lg;
+    border-radius: $margin-sm;
+    padding-left: $margin-sm;
+    background-color: $input-background;
+    outline: none;
+    border: 0;
+    color: $text-color;
+  }
+  input:disabled {
+    color: $text-color-disabled;
+  }
+  .custom-icon {
+    margin-right: $margin-md;
+  }
+}

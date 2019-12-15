@@ -1,0 +1,10 @@
+@import 'styles/constants.scss';
+
+.custom-icon {
+  margin: 0;
+  height: $margin-lg;
+
+  img {
+    height: $margin-lg;
+  }
+}

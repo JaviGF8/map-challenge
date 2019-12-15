@@ -34,9 +34,11 @@ export const ICON_STATUS = {
 };
 
 const Icon = ({ className, status, type }) => (
-  <div className={`custom-icon${className ? ` ${className}` : ''}`}>
-    {type && <img src={ICON_SRC[type || ICON_TYPES.DROP_OFF][status || ICON_STATUS.BLANK]} alt="icon" />}
-  </div>
+  <img
+    alt="icon"
+    className={`custom-icon${className ? ` ${className}` : ''}`}
+    src={ICON_SRC[type || ICON_TYPES.DROP_OFF][status || ICON_STATUS.BLANK]}
+  />
 );
 
 Icon.defaultProps = {

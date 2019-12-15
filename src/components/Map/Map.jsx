@@ -33,9 +33,19 @@ export default class GoogleMap extends Component {
   }
 
   componentDidMount() {
-    const { address, zoom } = this.props;
-
-    this.getLatitudeLongitude({ ...defaultMapOptions, zoom }, address);
+    if (!window.google) {
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src =
+        'https://maps.googleapis.com/maps/api/js?key=AIzaSyDYLmsAxF9IJ1ZKBQGmAY9u8TorQVLa1fA&libraries=places';
+      script.id = 'googleMaps';
+      document.body.appendChild(script);
+      script.addEventListener('load', () => {
+        this.onScriptLoad();
+      });
+    } else {
+      this.onScriptLoad();
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -63,6 +73,12 @@ export default class GoogleMap extends Component {
       this.createMap(defaultMapOptions);
     }
   }
+
+  onScriptLoad = () => {
+    const { address, zoom } = this.props;
+
+    this.getLatitudeLongitude({ ...defaultMapOptions, zoom }, address);
+  };
 
   getLatitudeLongitude = (mapOptions, address = '') => {
     const { zoom } = this.props;

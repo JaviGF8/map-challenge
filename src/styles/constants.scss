@@ -1,8 +1,15 @@
+// COLORS
+$primary-dark: #0f99e8;
+$primary: #10a2ea;
+
 $text-color: #252525;
 $text-color-disabled: #8596a6;
 
+// BACKGROUNDS
 $input-background: #f0f3f7;
+$btn-background: linear-gradient(90deg, rgba($primary, 1) 0%, rgba($primary-dark, 1) 100%);
 
+// SIZES
 $font-size: 16px;
 
 $margin-sm: 4px;

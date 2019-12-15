@@ -1,0 +1,12 @@
+@import 'styles/constants.scss';
+
+.custom-btn {
+  font-family: 'Roboto', sans-serif;
+  font-size: $font-size;
+  font-weight: 900;
+  height: 40px;
+  border-radius: $margin-sm;
+  background: $btn-background;
+  border: 0;
+  color: white;
+}

@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import dropOffMarker from '../../assets/dropOffMarker.svg';
 import pickUpMarker from '../../assets/pickUpMarker.svg';
 
-import './index.scss';
 import Input from '../base/Input/Input';
 import { ICON_TYPES, ICON_STATUS } from '../base/Icon/Icon';
 import Button from '../base/Button/Button';
@@ -30,7 +29,7 @@ const getMarkersArray = (pickUp, dropOff) => {
   return res;
 };
 
-const JobForm = ({ setMarkers }) => {
+const JobForm = ({ onCreate, setMarkers }) => {
   const [ dropOffStatus, setDropOffStatus ] = useState(null);
   const [ pickUpStatus, setPickUpStatus ] = useState(null);
   const [ loadingDropOff, setLoadingDropOff ] = useState(false);
@@ -109,7 +108,12 @@ const JobForm = ({ setMarkers }) => {
           getJobs(validPickUp.name, validDropOff.name)
             .then(() => {
               // Valid create, set timeout to simulate
-              setTimeout(() => setCreating(false), 1000);
+              setTimeout(() => {
+                setCreating(false);
+                if (onCreate) {
+                  onCreate();
+                }
+              }, 1000);
             })
             .catch(() => {
               // Wrong create, set timeout to simulate
@@ -123,10 +127,12 @@ const JobForm = ({ setMarkers }) => {
 };
 
 JobForm.defaultProps = {
+  onCreate: null,
   setMarkers: null,
 };
 
 JobForm.propTypes = {
+  onCreate: PropTypes.func,
   setMarkers: PropTypes.func,
 };
 

@@ -17,7 +17,20 @@ const formatMarker = ({ address, latitude, longitude }, dropoff) => ({
   icon: dropoff ? dropOffMarker : pickUpMarker,
 });
 
-const SearchBox = ({ setMarkers }) => {
+const getMarkersArray = (pickUp, dropOff) => {
+  const res = [];
+
+  if (pickUp) {
+    res.push(pickUp);
+  }
+  if (dropOff) {
+    res.push(dropOff);
+  }
+
+  return res;
+};
+
+const JobForm = ({ setMarkers }) => {
   const [ dropOffStatus, setDropOffStatus ] = useState(null);
   const [ pickUpStatus, setPickUpStatus ] = useState(null);
   const [ loadingDropOff, setLoadingDropOff ] = useState(false);
@@ -27,7 +40,7 @@ const SearchBox = ({ setMarkers }) => {
   const [ creating, setCreating ] = useState(false);
 
   return (
-    <div className="search-box shadow">
+    <form className="job-form shadow">
       <Input
         onChange={(address) => {
           setLoadingPickUp(true);
@@ -35,15 +48,19 @@ const SearchBox = ({ setMarkers }) => {
             getGeocode(address)
               .then((valid) => {
                 // Valid address
+                const pickUpFormatted = formatMarker(valid);
                 setLoadingPickUp(false);
-                setValidPickUp(valid);
+                setValidPickUp(pickUpFormatted);
                 if (setMarkers) {
-                  setMarkers([ formatMarker(valid) ]);
+                  setMarkers(getMarkersArray(pickUpFormatted, validDropOff));
                 }
                 setPickUpStatus(ICON_STATUS.PRESENT);
               })
               .catch(() => {
                 // Wrong address
+                if (setMarkers) {
+                  setMarkers(getMarkersArray(null, validDropOff));
+                }
                 setLoadingPickUp(false);
                 setValidPickUp(null);
                 setPickUpStatus(ICON_STATUS.ERROR);
@@ -61,18 +78,22 @@ const SearchBox = ({ setMarkers }) => {
         onChange={(dropOff) => {
           setLoadingDropOff(true);
           if (dropOff && 2 < dropOff.length) {
-            getJobs(validPickUp.address, dropOff)
+            getJobs(validPickUp.name, dropOff)
               .then((valid) => {
                 // Valid dropoff
+                const dropoffFormatted = formatMarker(valid.dropoff, true);
                 setDropOffStatus(ICON_STATUS.PRESENT);
-                setValidDropOff(valid);
+                setValidDropOff(dropoffFormatted);
                 if (setMarkers) {
-                  setMarkers([ formatMarker(validPickUp), formatMarker(valid.dropoff, true) ]);
+                  setMarkers(getMarkersArray(validPickUp, dropoffFormatted));
                 }
                 setLoadingDropOff(false);
               })
               .catch(() => {
                 // Wrong dropoff
+                if (setMarkers) {
+                  setMarkers(getMarkersArray(validPickUp, null));
+                }
                 setDropOffStatus(ICON_STATUS.ERROR);
                 setValidDropOff(null);
                 setLoadingDropOff(false);
@@ -85,20 +106,28 @@ const SearchBox = ({ setMarkers }) => {
         disabled={creating || !validDropOff || !validPickUp || loadingDropOff || loadingPickUp}
         onClick={() => {
           setCreating(true);
-          setTimeout(() => setCreating(false), 1000);
+          getJobs(validPickUp.name, validDropOff.name)
+            .then(() => {
+              // Valid create, set timeout to simulate
+              setTimeout(() => setCreating(false), 1000);
+            })
+            .catch(() => {
+              // Wrong create, set timeout to simulate
+              setTimeout(() => setCreating(false), 1000);
+            });
         }}
         text={creating ? 'Creating job...' : 'Create job'}
       />
-    </div>
+    </form>
   );
 };
 
-SearchBox.defaultProps = {
+JobForm.defaultProps = {
   setMarkers: null,
 };
 
-SearchBox.propTypes = {
+JobForm.propTypes = {
   setMarkers: PropTypes.func,
 };
 
-export default SearchBox;
+export default JobForm;

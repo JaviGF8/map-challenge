@@ -52,11 +52,6 @@ export default class GoogleMap extends Component {
     const { stateMarkers } = this.state;
 
     if (stateMarkers && stateMarkers.length && selectedMarker !== prevProps.selectedMarker) {
-      // If it had a previous marker, remove animation
-      if (prevProps.selectedMarker) {
-        const prevMarker = stateMarkers.find((mrkr) => mrkr.id === prevProps.selectedMarker.name);
-        prevMarker.marker.setAnimation(null);
-      }
       // If has a new marker, add animation
       if (selectedMarker !== prevProps.selectedMarker) {
         const currMarker = stateMarkers.find((mrkr) => mrkr.id === selectedMarker.name);
@@ -68,12 +63,13 @@ export default class GoogleMap extends Component {
       }
     }
     if (
-      (stateMarkers && markers && stateMarkers.length !== markers.length) ||
-      (!markers && stateMarkers) ||
-      (!stateMarkers && markers)
+      (prevProps.markers && markers && prevProps.markers.length < markers.length) ||
+      (!prevProps.markers && markers)
     ) {
-      // Different number of markers
+      // New markers have more than previous
       this.createMarkers();
+    } else if ((!markers && prevProps.markers) || (markers && prevProps.markers.length > markers.length)) {
+      this.createMap();
     }
   }
 
@@ -110,8 +106,21 @@ export default class GoogleMap extends Component {
     return null;
   };
 
+  clearStateMarkers = () => {
+    const { stateMarkers } = this.state;
+
+    if (stateMarkers && stateMarkers.length) {
+      stateMarkers.forEach(({ marker }) => {
+        marker.visible = false;
+      });
+    }
+  };
+
   createMarkers = () => {
     const { markers } = this.props;
+
+    this.clearStateMarkers();
+
     let stateMarkers = [];
     if (markers && markers.length) {
       stateMarkers = markers.map((marker) => ({ id: marker.name, marker: this.createMarker(marker) }));

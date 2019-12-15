@@ -1,6 +1,6 @@
 @import 'styles/constants.scss';
 
-.search-box {
+.job-form {
   display: flex;
   flex-direction: column;
   border-radius: $margin-md;
@@ -19,7 +19,7 @@
 }
 
 @media screen and (max-width: $screen-sm) {
-  .search-box {
+  .job-form {
     top: $margin-md;
     left: $margin-md;
     right: $margin-md;

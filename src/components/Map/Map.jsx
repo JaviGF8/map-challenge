@@ -36,8 +36,7 @@ export default class GoogleMap extends Component {
     if (!window.google) {
       const script = document.createElement('script');
       script.type = 'text/javascript';
-      script.src =
-        'https://maps.googleapis.com/maps/api/js?key=AIzaSyDYLmsAxF9IJ1ZKBQGmAY9u8TorQVLa1fA&libraries=places';
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_API_KEY}&libraries=places`;
       script.id = 'googleMaps';
       document.body.appendChild(script);
       script.addEventListener('load', () => {

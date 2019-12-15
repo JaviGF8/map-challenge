@@ -3,14 +3,27 @@
 .search-box {
   display: flex;
   flex-direction: column;
-  border-radius: 8px;
+  border-radius: $margin-md;
   background: white;
-  padding: 16px;
+  padding: $margin-lg;
   position: absolute;
-  top: 32px;
-  left: 32px;
+  top: $margin-xl;
+  left: $margin-xl;
+  max-width: 300px;
+  width: 100%;
 
   > *:not(:last-child) {
     margin-bottom: $margin-md;
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: $screen-sm) {
+  .search-box {
+    top: $margin-md;
+    left: $margin-md;
+    right: $margin-md;
+    max-width: inherit;
+    width: auto;
   }
 }

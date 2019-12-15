@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 
 import './index.scss';
 
-const Button = ({ className, disabled, text }) => (
-  <button className={`custom-btn${className ? ` ${className}` : ''}`} disabled={disabled} type="button">
+const Button = ({ className, disabled, text, ...rest }) => (
+  <button className={`custom-btn${className ? ` ${className}` : ''}`} disabled={disabled} type="button" {...rest}>
     {text}
   </button>
 );

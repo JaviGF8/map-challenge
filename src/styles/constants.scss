@@ -14,4 +14,15 @@ $font-size: 16px;
 
 $margin-sm: 4px;
 $margin-md: 8px;
-$margin-lg: 32px;
+$margin-lg: 16px;
+$margin-xl: 32px;
+
+$screen-sm: 576px;
+$screen-md: 768px;
+$screen-lg: 992px;
+$screen-xl: 1200px;
+
+// IMES
+$transition-fast: 0.1s;
+$transition-normal: 0.25s;
+$transition-slow: 0.5s;

@@ -1,15 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import Map from './components/Map';
 import SearchBox from './components/SearchBox';
 
-function App() {
+const App = () => {
+  const [ markers, setMarkers ] = useState([]);
+  const [ selected, setSelected ] = useState(null);
+
   return (
     <div className="App">
-      <Map markers={[ { _id: 1, availability: true, geoposition: { lat: 48.86993, lng: 2.334504 }, name: '1' } ]} />
-      <SearchBox />
+      <Map
+        markers={
+          markers
+          // [ { _id: 1, availability: true, geoposition: { lat: 48.86993, lng: 2.334504 }, name: '1' } ]
+        }
+        selectedMarker={selected}
+      />
+      <SearchBox
+        setMarkers={(newMarkers) => {
+          setMarkers(newMarkers);
+          setSelected(newMarkers && 0 < newMarkers.length ? newMarkers[newMarkers.length - 1] : null);
+        }}
+      />
     </div>
   );
-}
+};
 
 export default App;

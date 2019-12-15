@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+
+import dropOffMarker from '../../assets/dropOffMarker.svg';
+import pickUpMarker from '../../assets/pickUpMarker.svg';
 
 import './index.scss';
 import Input from '../base/Input/Input';
@@ -7,7 +11,13 @@ import Button from '../base/Button/Button';
 
 import { getGeocode, getJobs } from '../../actions/api';
 
-const SearchBox = () => {
+const formatMarker = ({ address, latitude, longitude }, dropoff) => ({
+  geoposition: { lat: latitude, lng: longitude },
+  name: address,
+  icon: dropoff ? dropOffMarker : pickUpMarker,
+});
+
+const SearchBox = ({ setMarkers }) => {
   const [ dropOffStatus, setDropOffStatus ] = useState(null);
   const [ pickUpStatus, setPickUpStatus ] = useState(null);
   const [ loadingDropOff, setLoadingDropOff ] = useState(false);
@@ -24,11 +34,16 @@ const SearchBox = () => {
           if (address && 2 < address.length) {
             getGeocode(address)
               .then((valid) => {
+                // Valid address
                 setLoadingPickUp(false);
                 setValidPickUp(valid);
+                if (setMarkers) {
+                  setMarkers([ formatMarker(valid) ]);
+                }
                 setPickUpStatus(ICON_STATUS.PRESENT);
               })
               .catch(() => {
+                // Wrong address
                 setLoadingPickUp(false);
                 setValidPickUp(null);
                 setPickUpStatus(ICON_STATUS.ERROR);
@@ -48,11 +63,16 @@ const SearchBox = () => {
           if (dropOff && 2 < dropOff.length) {
             getJobs(validPickUp.address, dropOff)
               .then((valid) => {
+                // Valid dropoff
                 setDropOffStatus(ICON_STATUS.PRESENT);
                 setValidDropOff(valid);
+                if (setMarkers) {
+                  setMarkers([ formatMarker(validPickUp), formatMarker(valid.dropoff, true) ]);
+                }
                 setLoadingDropOff(false);
               })
               .catch(() => {
+                // Wrong dropoff
                 setDropOffStatus(ICON_STATUS.ERROR);
                 setValidDropOff(null);
                 setLoadingDropOff(false);
@@ -71,6 +91,14 @@ const SearchBox = () => {
       />
     </div>
   );
+};
+
+SearchBox.defaultProps = {
+  setMarkers: null,
+};
+
+SearchBox.propTypes = {
+  setMarkers: PropTypes.func,
 };
 
 export default SearchBox;

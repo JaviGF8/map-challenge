@@ -20,12 +20,10 @@ const Input = ({ className, iconStatus, iconType, maxLength, onChange, onEnter, 
           }
 
           setInputValue(val);
-          if (onChange) {
-            onChange(val);
-          }
+          onChange(val);
         }}
         onKeyPress={(event) => {
-          if ('Enter' === event.key) {
+          if ('Enter' === event.key && 'function' === typeof onEnter) {
             onEnter(inputValue);
           }
         }}
@@ -41,7 +39,7 @@ Input.defaultProps = {
   iconType: null,
   maxLength: null,
   onChange: () => true,
-  onEnter: () => true,
+  onEnter: null,
   value: '',
 };
 

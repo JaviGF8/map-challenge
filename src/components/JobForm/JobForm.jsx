@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import dropOffMarker from '../../assets/dropOffMarker.svg';
@@ -30,6 +30,8 @@ const getMarkersArray = (pickUp, dropOff) => {
 };
 
 const JobForm = ({ onCreate, setMarkers }) => {
+  const [ dropOff, setDropOff ] = useState(null);
+  const [ pickUp, setPickUp ] = useState(null);
   const [ dropOffStatus, setDropOffStatus ] = useState(null);
   const [ pickUpStatus, setPickUpStatus ] = useState(null);
   const [ loadingDropOff, setLoadingDropOff ] = useState(false);
@@ -38,32 +40,79 @@ const JobForm = ({ onCreate, setMarkers }) => {
   const [ validPickUp, setValidPickUp ] = useState(false);
   const [ creating, setCreating ] = useState(false);
 
+  useEffect(() => {
+    // When is creating
+    if (creating) {
+      getJobs(validPickUp.name, validDropOff.name)
+        .then(() => {
+          // Valid create, set timeout to simulate
+          setTimeout(() => {
+            setCreating(false);
+            onCreate();
+          }, 1000);
+        })
+        .catch(() => {
+          // Wrong create, set timeout to simulate
+          setTimeout(() => setCreating(false), 1000);
+        });
+    }
+  }, [ creating ]);
+
+  useEffect(() => {
+    // When is loadingPickUp
+    if (loadingPickUp) {
+      getGeocode(pickUp)
+        .then((valid) => {
+          // Valid pickUp
+          const pickUpFormatted = formatMarker(valid);
+          setLoadingPickUp(false);
+          setValidPickUp(pickUpFormatted);
+          setMarkers(getMarkersArray(pickUpFormatted, validDropOff));
+          setPickUpStatus(ICON_STATUS.PRESENT);
+        })
+        .catch(() => {
+          // Wrong pickUp
+          if (setMarkers) {
+            setMarkers(getMarkersArray(null, validDropOff));
+          }
+          setLoadingPickUp(false);
+          setValidPickUp(null);
+          setPickUpStatus(ICON_STATUS.ERROR);
+        });
+    }
+  }, [ loadingPickUp ]);
+
+  useEffect(() => {
+    // When is loadingDropOff
+    if (loadingDropOff) {
+      getJobs(validPickUp.name, dropOff)
+        .then((valid) => {
+          // Valid dropoff
+          const dropoffFormatted = formatMarker(valid.dropoff, true);
+          setDropOffStatus(ICON_STATUS.PRESENT);
+          setValidDropOff(dropoffFormatted);
+          setMarkers(getMarkersArray(validPickUp, dropoffFormatted));
+          setLoadingDropOff(false);
+        })
+        .catch(() => {
+          // Wrong dropoff
+          setMarkers(getMarkersArray(validPickUp, null));
+          setDropOffStatus(ICON_STATUS.ERROR);
+          setValidDropOff(null);
+          setLoadingDropOff(false);
+        });
+    }
+  }, [ loadingDropOff ]);
+
   return (
     <form className="job-form shadow">
       <Input
         onChange={(address) => {
-          setLoadingPickUp(true);
-          if (address && 2 < address.length) {
-            getGeocode(address)
-              .then((valid) => {
-                // Valid address
-                const pickUpFormatted = formatMarker(valid);
-                setLoadingPickUp(false);
-                setValidPickUp(pickUpFormatted);
-                if (setMarkers) {
-                  setMarkers(getMarkersArray(pickUpFormatted, validDropOff));
-                }
-                setPickUpStatus(ICON_STATUS.PRESENT);
-              })
-              .catch(() => {
-                // Wrong address
-                if (setMarkers) {
-                  setMarkers(getMarkersArray(null, validDropOff));
-                }
-                setLoadingPickUp(false);
-                setValidPickUp(null);
-                setPickUpStatus(ICON_STATUS.ERROR);
-              });
+          if (address && 3 < address.length) {
+            setLoadingPickUp(true);
+            setPickUp(address);
+          } else {
+            setPickUpStatus(ICON_STATUS.BLANK);
           }
         }}
         iconType={ICON_TYPES.PICK_UP}
@@ -74,52 +123,19 @@ const JobForm = ({ onCreate, setMarkers }) => {
         disabled={!validPickUp}
         iconType={ICON_TYPES.DROP_OFF}
         iconStatus={loadingDropOff ? ICON_STATUS.BLANK : dropOffStatus}
-        onChange={(dropOff) => {
-          setLoadingDropOff(true);
-          if (dropOff && 2 < dropOff.length) {
-            getJobs(validPickUp.name, dropOff)
-              .then((valid) => {
-                // Valid dropoff
-                const dropoffFormatted = formatMarker(valid.dropoff, true);
-                setDropOffStatus(ICON_STATUS.PRESENT);
-                setValidDropOff(dropoffFormatted);
-                if (setMarkers) {
-                  setMarkers(getMarkersArray(validPickUp, dropoffFormatted));
-                }
-                setLoadingDropOff(false);
-              })
-              .catch(() => {
-                // Wrong dropoff
-                if (setMarkers) {
-                  setMarkers(getMarkersArray(validPickUp, null));
-                }
-                setDropOffStatus(ICON_STATUS.ERROR);
-                setValidDropOff(null);
-                setLoadingDropOff(false);
-              });
+        onChange={(dropOffAddress) => {
+          if (dropOffAddress && 3 < dropOffAddress.length) {
+            setLoadingDropOff(true);
+            setDropOff(dropOffAddress);
+          } else {
+            setPickUpStatus(ICON_STATUS.BLANK);
           }
         }}
         placeholder="Drop off address"
       />
       <Button
         disabled={creating || !validDropOff || !validPickUp || loadingDropOff || loadingPickUp}
-        onClick={() => {
-          setCreating(true);
-          getJobs(validPickUp.name, validDropOff.name)
-            .then(() => {
-              // Valid create, set timeout to simulate
-              setTimeout(() => {
-                setCreating(false);
-                if (onCreate) {
-                  onCreate();
-                }
-              }, 1000);
-            })
-            .catch(() => {
-              // Wrong create, set timeout to simulate
-              setTimeout(() => setCreating(false), 1000);
-            });
-        }}
+        onClick={() => setCreating(true)}
         text={creating ? 'Creating job...' : 'Create job'}
       />
     </form>
@@ -127,8 +143,8 @@ const JobForm = ({ onCreate, setMarkers }) => {
 };
 
 JobForm.defaultProps = {
-  onCreate: null,
-  setMarkers: null,
+  onCreate: () => true,
+  setMarkers: () => true,
 };
 
 JobForm.propTypes = {

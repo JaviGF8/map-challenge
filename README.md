@@ -42,3 +42,9 @@ npm start
 - [React](https://es.reactjs.org/docs/getting-started.html) - The web framework used
 - [Webpack](https://webpack.js.org)
 - [Babel](https://babeljs.io)
+
+## Improvements
+
+In my opinion, the most important thing is to change the way I'm calling the API. I would wait until the user stops writing, because now is calling everytime the user types a letter. I didn't have time to improve this.
+
+Also, I would've create an Input which uses Google Maps API to get the suggestions while we're writing, and then, when we have a valid address, we call our API.

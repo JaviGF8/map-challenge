@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import './index.scss';
 
@@ -15,6 +15,18 @@ const defaultMapOptions = {
 
 let mapDiv = null;
 
+const initializeMapsApi = (callback) => {
+  if (!window.google) {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_API_KEY}&libraries=places`;
+    script.id = 'googleMaps';
+    document.body.appendChild(script);
+    return script.addEventListener('load', callback);
+  }
+  return callback();
+};
+
 const centerMap = (position) => mapDiv.panTo(position);
 
 const makeMarkerBounce = (mapMarker) => {
@@ -24,133 +36,103 @@ const makeMarkerBounce = (mapMarker) => {
   }, 250);
 };
 
-export default class GoogleMap extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      stateMarkers: [],
+/**
+ * Creates a marker for the map
+ */
+const createMarker = (marker, bounceOnHover, onMarkerHover) => {
+  if (marker && marker.geoposition && mapDiv) {
+    const { icon, geoposition, name } = marker;
+
+    const newIcon = {
+      scaledSize: new window.google.maps.Size(50, 50), // scaled size
     };
-  }
-
-  componentDidMount() {
-    if (!window.google) {
-      const script = document.createElement('script');
-      script.type = 'text/javascript';
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_API_KEY}&libraries=places`;
-      script.id = 'googleMaps';
-      document.body.appendChild(script);
-      script.addEventListener('load', () => {
-        this.createMap();
-      });
-    } else {
-      this.createMap();
+    if (icon) {
+      newIcon.url = icon;
     }
-  }
 
-  componentDidUpdate(prevProps) {
-    const { markers, selectedMarker } = this.props;
-    const { stateMarkers } = this.state;
+    const mapMarker = new window.google.maps.Marker({
+      map: mapDiv,
+      icon: newIcon,
+      title: name || 'point',
+      position: { lat: geoposition.lat, lng: geoposition.lng },
+    });
 
-    if (stateMarkers && stateMarkers.length && selectedMarker !== prevProps.selectedMarker) {
-      // If has a new marker, add animation
-      if (selectedMarker !== prevProps.selectedMarker) {
-        const currMarker = stateMarkers.find((mrkr) => mrkr.id === selectedMarker.name);
-
-        if (currMarker) {
-          makeMarkerBounce(currMarker.marker);
-          centerMap(currMarker.marker.position);
-        }
-      }
-    }
-    if (
-      (prevProps.markers && markers && prevProps.markers.length < markers.length) ||
-      (!prevProps.markers && markers)
-    ) {
-      // New markers have more than previous
-      this.createMarkers();
-    } else if ((!markers && prevProps.markers) || (markers && prevProps.markers.length > markers.length)) {
-      this.createMap();
-    }
-  }
-
-  createMarker = (marker) => {
-    if (marker && marker.geoposition && mapDiv) {
-      const { bounceOnHover, onMarkerHover } = this.props;
-      const { icon, geoposition, name } = marker;
-
-      const newIcon = {
-        scaledSize: new window.google.maps.Size(50, 50), // scaled size
-      };
-      if (icon) {
-        newIcon.url = icon;
-      }
-
-      const mapMarker = new window.google.maps.Marker({
-        map: mapDiv,
-        icon: newIcon,
-        title: name || 'point',
-        position: { lat: geoposition.lat, lng: geoposition.lng },
-      });
-
-      if (bounceOnHover) {
-        mapMarker.addListener('mouseover', () => {
-          makeMarkerBounce(mapMarker);
-          if (onMarkerHover) {
-            onMarkerHover(name);
-          }
-        });
-      }
-
-      return mapMarker;
-    }
-    return null;
-  };
-
-  clearStateMarkers = () => {
-    const { stateMarkers } = this.state;
-
-    if (stateMarkers && stateMarkers.length) {
-      stateMarkers.forEach(({ marker }) => {
-        marker.visible = false;
+    if (bounceOnHover) {
+      mapMarker.addListener('mouseover', () => {
+        makeMarkerBounce(mapMarker);
+        onMarkerHover(name);
       });
     }
-  };
 
-  createMarkers = () => {
-    const { markers } = this.props;
+    return mapMarker;
+  }
+  return null;
+};
 
-    this.clearStateMarkers();
+/**
+ * Creates an array of markers
+ */
+const createMarkers = (markers, bounceOnHover, onMarkerHover) => {
+  let mrkrs = [];
+  if (markers && markers.length) {
+    mrkrs = markers.map((marker) => ({ id: marker.name, marker: createMarker(marker, bounceOnHover, onMarkerHover) }));
+  }
 
-    let stateMarkers = [];
-    if (markers && markers.length) {
-      stateMarkers = markers.map((marker) => ({ id: marker.name, marker: this.createMarker(marker) }));
-    }
+  return mrkrs;
+};
 
-    this.setState({ stateMarkers });
-  };
+const GoogleMap = ({ bounceOnHover, className, mapId, markers, onMarkerHover, selectedMarker, zoom }) => {
+  const [ initialized, setInitialized ] = useState(false);
+  const [ stateMarkers, setStateMarkers ] = useState([]);
 
-  createMap = () => {
-    const { zoom } = this.props;
+  const createMap = () => {
     const mapOptions = { ...defaultMapOptions, zoom };
 
     mapDiv = new window.google.maps.Map(document.getElementById('map'), mapOptions);
-    this.createMarkers();
+    setStateMarkers(createMarkers(markers, bounceOnHover, onMarkerHover));
   };
 
-  render() {
-    const { mapId, className } = this.props;
+  useEffect(() => {
+    if (!initialized) {
+      initializeMapsApi(() => {
+        setInitialized(true);
+        createMap();
+      });
+    }
+  });
 
-    return <div id={mapId} className={`custom-map${className ? ` ${className}` : ''}`} />;
-  }
-}
+  useEffect(() => {
+    if (selectedMarker) {
+      // Has a new marker, add animation
+      const currMarker = stateMarkers.find((mrkr) => mrkr.id === selectedMarker.name);
+
+      if (currMarker) {
+        makeMarkerBounce(currMarker.marker);
+        centerMap(currMarker.marker.position);
+      }
+    }
+  }, [ selectedMarker ]);
+
+  useEffect(() => {
+    // Has a different markers
+    if ((stateMarkers && markers && stateMarkers.length < markers.length) || (!stateMarkers && markers)) {
+      // New markers have more than previous
+      createMarkers(markers, bounceOnHover, onMarkerHover);
+    } else if ((!markers && stateMarkers) || (markers && stateMarkers.length > markers.length)) {
+      createMap();
+    }
+  }, [ markers ]);
+
+  return <div id={mapId} className={`custom-map${className ? ` ${className}` : ''}`} />;
+};
 
 GoogleMap.defaultProps = {
   bounceOnHover: true,
   className: null,
   mapId: 'map',
-  selectedMarker: null,
   markers: [],
-  onMarkerHover: null,
+  onMarkerHover: () => true,
+  selectedMarker: null,
   zoom: 15,
 };
 
@@ -164,3 +146,5 @@ GoogleMap.propTypes = {
   selectedMarker: PropTypes.string,
   zoom: PropTypes.number,
 };
+
+export default GoogleMap;

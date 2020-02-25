@@ -2,12 +2,12 @@
 
 .custom-toast {
   position: absolute;
-  padding: $margin-md;
+  padding: $size-md;
   border-radius: $border-radius-sm;
   background-color: rgba(0, 0, 0, 0.75);
   color: white;
-  right: $margin-xl;
-  top: $margin-xl;
+  right: $size-xl;
+  top: $size-xl;
   opacity: 0;
   transition: linear all $transition-normal;
   pointer-events: none;

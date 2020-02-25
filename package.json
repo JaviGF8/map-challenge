@@ -5,7 +5,8 @@
   "description": "Map challenge is a test application which creates a job between two points in a map",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server -d --progress"
+    "start": "SET ENVIRONMENT=development&& webpack-dev-server -d --progress",
+    "mac": "ENVIRONMENT=development webpack-dev-server -d --progress"
   },
   "husky": {
     "hooks": {

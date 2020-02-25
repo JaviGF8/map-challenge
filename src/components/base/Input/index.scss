@@ -7,9 +7,9 @@
   input {
     font-family: 'Roboto', sans-serif;
     font-size: $font-size;
-    height: $margin-xl;
+    height: $size-xl;
     border-radius: $border-radius-sm;
-    padding-left: $margin-sm;
+    padding-left: $size-sm;
     background-color: $input-background;
     outline: none;
     border: 0;
@@ -21,6 +21,6 @@
     color: $text-color-disabled;
   }
   .custom-icon {
-    margin-right: $margin-md;
+    margin-right: $size-md;
   }
 }

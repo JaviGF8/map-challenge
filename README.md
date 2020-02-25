@@ -43,6 +43,13 @@ npm start
 - [Webpack](https://webpack.js.org)
 - [Babel](https://babeljs.io)
 
+## Use
+
+There's only one correct address for the pick up address, and one correct for the drop off address:
+
+- Pick up address: "29 Rue du 4 Septembre"
+- Drop off address: "15 Rue de Bourgogne"
+
 ## Improvements
 
 In my opinion, the most important thing is to change the way I'm calling the API. I would wait until the user stops writing, because now is calling everytime the user types a letter. I didn't have time to improve this.

@@ -5,24 +5,24 @@
   flex-direction: column;
   border-radius: $border-radius-md;
   background: white;
-  padding: $margin-lg;
+  padding: $size-lg;
   position: absolute;
-  top: $margin-xl;
-  left: $margin-xl;
+  top: $size-xl;
+  left: $size-xl;
   max-width: 300px;
   width: 100%;
 
   > *:not(:last-child) {
-    margin-bottom: $margin-md;
+    margin-bottom: $size-md;
     width: 100%;
   }
 }
 
 @media screen and (max-width: $screen-sm) {
   .job-form {
-    top: $margin-md;
-    left: $margin-md;
-    right: $margin-md;
+    top: $size-md;
+    left: $size-md;
+    right: $size-md;
     max-width: inherit;
     width: auto;
   }
